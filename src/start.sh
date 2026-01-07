@@ -7,6 +7,16 @@ export LD_PRELOAD="${TCMALLOC}"
 # Ensure ComfyUI-Manager runs in offline network mode inside the container
 comfy-manager-set-mode offline || echo "worker-comfyui - Could not set ComfyUI-Manager network_mode" >&2
 
+# Link custom nodes from network volume (Critical for Wan 2.2)
+if [ -d "/runpod-volume/custom_nodes" ]; then
+    echo "worker-comfyui: Linking custom nodes from volume..."
+    for dir in /runpod-volume/custom_nodes/*; do
+        if [ -d "$dir" ]; then
+            ln -s "$dir" "/comfyui/custom_nodes/$(basename "$dir")" || echo "Failed to link $dir"
+        fi
+    done
+fi
+
 echo "worker-comfyui: Starting ComfyUI"
 
 # Allow operators to tweak verbosity; default is DEBUG.
