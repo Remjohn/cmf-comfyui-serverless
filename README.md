@@ -214,3 +214,5 @@ The repository includes sample files for testing:
 - [ComfyUI](https://github.com/comfyanonymous/ComfyUI) by comfyanonymous
 - [RunPod](https://www.runpod.io/) for serverless infrastructure
 - Original worker inspiration from [runpod-worker-comfy](https://github.com/blib-la/runpod-worker-comfy)
+
+# Build trigger
