@@ -1,0 +1,35 @@
+{
+    "input": {
+        "images": [
+            {
+                "name": "test.png",
+                "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAMklEQVR4nGI5ZdXAQEvARFPTRy0YtWDUglELRi0YtWDUglELRi0YtWDUAioCQAAAAP//E24Bx3jUKuYAAAAASUVORK5CYII="
+            }
+        ],
+        "workflow": {
+            "1": {
+                "inputs": {
+                    "image": "test.png",
+                    "upload": "image"
+                },
+                "class_type": "LoadImage",
+                "_meta": {
+                    "title": "Load Image"
+                }
+            },
+            "2": {
+                "inputs": {
+                    "filename_prefix": "TEST_PASSED",
+                    "images": [
+                        "1",
+                        0
+                    ]
+                },
+                "class_type": "SaveImage",
+                "_meta": {
+                    "title": "Save Image"
+                }
+            }
+        }
+    }
+}
