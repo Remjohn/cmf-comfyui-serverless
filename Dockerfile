@@ -106,15 +106,8 @@ RUN mkdir -p models/checkpoints models/vae models/unet models/clip
 
 # Download checkpoints/vae/unet/clip models to include in image based on model type
 
-RUN if [ "$MODEL_TYPE" = "sd3" ]; then \
-      wget -q --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O models/checkpoints/sd3_medium_incl_clips_t5xxlfp8.safetensors https://huggingface.co/stabilityai/stable-diffusion-3-medium/resolve/main/sd3_medium_incl_clips_t5xxlfp8.safetensors; \
-    fi
-
-
-
-RUN if [ "$MODEL_TYPE" = "flux1-dev-fp8" ]; then \
-      wget -q -O models/checkpoints/flux1-dev-fp8.safetensors https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors; \
-    fi
+# Models will be downloaded at runtime to /runpod-volume
+# See scripts/download_models.sh
 
 # Stage 3: Final image
 FROM base AS final
