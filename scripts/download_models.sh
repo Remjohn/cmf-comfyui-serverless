@@ -1,59 +1,39 @@
 #!/bin/bash
 set -e
 
-# Define model paths
+# Define paths
 VOLUME_DIR="/runpod-volume"
-MODELS_DIR="$VOLUME_DIR/models"
-CHECKPOINTS_DIR="$MODELS_DIR/checkpoints"
-VAE_DIR="$MODELS_DIR/vae"
-UNET_DIR="$MODELS_DIR/unet"
-CLIP_DIR="$MODELS_DIR/clip"
+VOLUME_MODELS="$VOLUME_DIR/models"
+COMFY_MODELS="/comfyui/models"
 
-mkdir -p "$CHECKPOINTS_DIR"
-mkdir -p "$VAE_DIR"
-mkdir -p "$UNET_DIR"
-mkdir -p "$CLIP_DIR"
+echo "worker-comfyui: Linking existing models from Network Volume..."
 
-echo "worker-comfyui: Checking for models in Network Volume ($VOLUME_DIR)..."
+# List of standard ComfyUI model subdirectories to link
+# We link each folder individually to preserve the structure
+SUBDIRS=("checkpoints" "vae" "unet" "clip" "loras" "controlnet" "upscale_models" "embeddings" "diffusers")
 
-# --- FLUX 1 DEV FP8 ---
-FLUX_PATH="$CHECKPOINTS_DIR/flux1-dev-fp8.safetensors"
-if [ ! -f "$FLUX_PATH" ]; then
-    echo "worker-comfyui: Downloading Flux1 Dev FP8..."
-    wget -q -O "$FLUX_PATH" https://huggingface.co/Comfy-Org/flux1-dev/resolve/main/flux1-dev-fp8.safetensors
-    echo "worker-comfyui: Downloaded Flux1 Dev FP8."
+if [ -d "$VOLUME_MODELS" ]; then
+    for subdir in "${SUBDIRS[@]}"; do
+        VOL_PATH="$VOLUME_MODELS/$subdir"
+        COMFY_PATH="$COMFY_MODELS/$subdir"
+
+        if [ -d "$VOL_PATH" ]; then
+            echo "worker-comfyui: Linking $subdir from Volume..."
+            
+            # Remove the empty default folder in ComfyUI if it exists
+            if [ -d "$COMFY_PATH" ]; then
+                rm -rf "$COMFY_PATH"
+            fi
+            
+            # Link the specific folder from volume to ComfyUI
+            ln -s "$VOL_PATH" "$COMFY_PATH"
+        else
+            echo "worker-comfyui: No '$subdir' folder found in Volume. Skipping."
+        fi
+    done
 else
-    echo "worker-comfyui: Flux1 Dev FP8 already exists."
+    echo "worker-comfyui: WARNING - No 'models' directory found in Network Volume ($VOLUME_MODELS)."
+    echo "worker-comfyui: Assuming models are managed manually or elsewhere."
 fi
 
-# --- SD3 MEDIUM ---
-SD3_PATH="$CHECKPOINTS_DIR/sd3_medium_incl_clips_t5xxlfp8.safetensors"
-if [ ! -f "$SD3_PATH" ]; then
-    echo "worker-comfyui: Downloading SD3 Medium..."
-    # Note: Requires HUGGINGFACE_ACCESS_TOKEN env var if repo is gated
-    wget -q --header="Authorization: Bearer ${HUGGINGFACE_ACCESS_TOKEN}" -O "$SD3_PATH" https://huggingface.co/stabilityai/stable-diffusion-3-medium/resolve/main/sd3_medium_incl_clips_t5xxlfp8.safetensors
-    echo "worker-comfyui: Downloaded SD3 Medium."
-else
-    echo "worker-comfyui: SD3 Medium already exists."
-fi
-
-# --- Symlink models to ComfyUI directory ---
-# This ensures ComfyUI sees the models in the volume without copying them
-echo "worker-comfyui: Symlinking models to ComfyUI..."
-
-# Remove existing empty directories in ComfyUI to allow symlinking
-rm -rf /comfyui/models/checkpoints
-rm -rf /comfyui/models/vae
-rm -rf /comfyui/models/unet
-rm -rf /comfyui/models/clip
-
-# create /comfyui/models if not exists
-mkdir -p /comfyui/models
-
-# Link the volume directories
-ln -s "$CHECKPOINTS_DIR" /comfyui/models/checkpoints
-ln -s "$VAE_DIR" /comfyui/models/vae
-ln -s "$UNET_DIR" /comfyui/models/unet
-ln -s "$CLIP_DIR" /comfyui/models/clip
-
-echo "worker-comfyui: Model setup complete."
+echo "worker-comfyui: Model linking complete."
