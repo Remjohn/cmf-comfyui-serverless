@@ -2,7 +2,7 @@
 set -e
 
 # Define paths
-VOLUME_DIR="/runpod-volume"
+VOLUME_DIR="/workspace"
 VOLUME_MODELS="$VOLUME_DIR/models"
 COMFY_MODELS="/comfyui/models"
 
