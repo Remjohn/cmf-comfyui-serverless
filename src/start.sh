@@ -14,22 +14,24 @@ if [ -f "/scripts/download_models.sh" ]; then
     /scripts/download_models.sh
 fi
 
-# Link custom nodes from network volume (Critical for Wan 2.2)
-if [ -d "/workspace/custom_nodes" ]; then
-    echo "worker-comfyui: Linking custom nodes from volume..."
-    for dir in /workspace/custom_nodes/*; do
+# --- AUTO-DETECT CUSTOM NODES ---
+if [ -d "/runpod-volume/custom_nodes" ]; then
+    CN_SOURCE="/runpod-volume/custom_nodes"
+elif [ -d "/workspace/custom_nodes" ]; then
+    CN_SOURCE="/workspace/custom_nodes"
+else
+    CN_SOURCE=""
+fi
+
+if [ -n "$CN_SOURCE" ]; then
+    echo "worker-comfyui: Linking custom nodes from $CN_SOURCE..."
+    for dir in "$CN_SOURCE"/*; do
         if [ -d "$dir" ]; then
             ln -s "$dir" "/comfyui/custom_nodes/$(basename "$dir")" || echo "Failed to link $dir"
         fi
     done
-elif [ -d "/runpod-volume/custom_nodes" ]; then
-     # Fallback check
-    echo "worker-comfyui: Linking custom nodes from fallback /runpod-volume..."
-    for dir in /runpod-volume/custom_nodes/*; do
-        if [ -d "$dir" ]; then
-            ln -s "$dir" "/comfyui/custom_nodes/$(basename "$dir")" || echo "Failed to link $dir"
-        fi
-    done
+else
+    echo "worker-comfyui: No custom_nodes folder found in Volume."
 fi
 
 echo "worker-comfyui: Starting ComfyUI"
