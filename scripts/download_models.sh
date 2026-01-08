@@ -23,8 +23,9 @@ COMFY_MODELS="/comfyui/models"
 
 # --- LINKING LOGIC ---
 echo "worker-comfyui: Linking models from $VOLUME_MODELS..."
-
-SUBDIRS=("checkpoints" "vae" "unet" "clip" "loras" "controlnet" "upscale_models" "embeddings" "diffusers")
+# List of standard ComfyUI model subdirectories to link
+# We link each folder individually to preserve the structure
+SUBDIRS=("checkpoints" "vae" "unet" "clip" "loras" "controlnet" "upscale_models" "embeddings" "diffusers" "text_encoders" "clip_vision" "configs" "style_models" "hypernetworks" "photomaker" "vae_approx" "gligen" "diffusion_models" "audio_encoders")
 
 if [ -d "$VOLUME_MODELS" ]; then
     for subdir in "${SUBDIRS[@]}"; do
